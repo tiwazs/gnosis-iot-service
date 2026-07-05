@@ -1,0 +1,54 @@
+generator client {
+  provider             = "prisma-client-py"
+  recursive_type_depth = "5"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Devices {
+  id String @id @default(uuid())
+  workspaceId String
+  name String
+  description String?
+  status Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Positions {
+  id String @id @default(uuid())
+  deviceId String
+  latitude Float
+  longitude Float
+  altitude Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Operations {
+  id String @id @default(uuid())
+  workspaceId String
+  name String
+  description String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Actions {
+  id String @id @default(uuid())
+  operationId String
+  name String
+  body String
+  type ActionType
+  description String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum ActionType {
+  BASIC
+  COMPLEX
+}
