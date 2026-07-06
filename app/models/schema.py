@@ -35,6 +35,10 @@ class Device(Base, TimestampMixin):
         back_populates="device",
         cascade="all, delete-orphan"
     )
+    device_operations: Mapped[List["DeviceOperations"]] = relationship(
+        back_populates="device",
+        cascade="all, delete-orphan"
+    )
 
 class Coordinate(Base, TimestampMixin):
     __tablename__ = "coordinates"
@@ -45,6 +49,15 @@ class Coordinate(Base, TimestampMixin):
     latitude: Mapped[float] = mapped_column()
     longitude: Mapped[float] = mapped_column()
 
+class DeviceOperations(Base, TimestampMixin):
+    __tablename__ = "device_operations"
+
+    id: Mapped[uuid_pk]
+    device_id: Mapped[str] = mapped_column(String(36), ForeignKey("devices.id", ondelete="CASCADE") )
+    device: Mapped["Device"] = relationship(back_populates="device_operations")
+    operation_id: Mapped[str] = mapped_column(String(36), ForeignKey("operations.id", ondelete="CASCADE") )
+    operation: Mapped["Operation"] = relationship(back_populates="device_operations")
+
 class Operation(Base, TimestampMixin):
     __tablename__ = "operations"
 
@@ -53,6 +66,7 @@ class Operation(Base, TimestampMixin):
     name: Mapped[str] = mapped_column(String(100))
     description: Mapped[Optional[str]] = mapped_column(String(500))
     actions: Mapped[List["Action"]] = relationship(back_populates="operation", cascade="all, delete-orphan")
+    device_operations: Mapped[List["DeviceOperations"]] = relationship(back_populates="operation", cascade="all, delete-orphan")
 
 class Action(Base, TimestampMixin):
     __tablename__ = "actions"
