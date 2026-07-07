@@ -49,3 +49,18 @@ class DevicesService:
             await self.db.refresh(device)
         
         return device
+    
+    async def delete_device(self, device_id):
+        statement = select(Device).where(Device.id == device_id)
+
+        result = await self.db.execute(statement)
+
+        device = result.scalar_one_or_none()
+
+        if device:
+            await self.db.delete(device)
+            await self.db.commit()
+
+            return True
+    
+        return False
