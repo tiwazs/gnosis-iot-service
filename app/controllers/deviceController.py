@@ -13,7 +13,7 @@ async def get_devices(devices_service: DevicesService = Depends(get_devices_serv
 
 
 @router.get("/{device_id}")
-async def get_device(device_id: int, devices_service: DevicesService = Depends(get_devices_service)):
+async def get_device(device_id: str, devices_service: DevicesService = Depends(get_devices_service)):
     device =  await devices_service.get_device(device_id)
 
     if not device:

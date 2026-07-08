@@ -43,7 +43,7 @@ class DevicesService:
                 if hasattr(device, key):
                     setattr(device, key, value)
 
-            self.db.add(device)
+            await self.db.add(device)
 
             await self.db.commit()
             await self.db.refresh(device)
