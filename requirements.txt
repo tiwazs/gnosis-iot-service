@@ -1,8 +1,18 @@
+# Core dependencies
 fastapi==0.110.0
 uvicorn==0.30.1
 python-dotenv
+
 prisma==0.12.0
+
+# DB and migrations
 sqlalchemy[asyncio] 
 asyncpg 
 psycopg[binary]
 alembic
+
+# Testing
+pytest 
+httpx 
+pytest-asyncio 
+pytest-cov
