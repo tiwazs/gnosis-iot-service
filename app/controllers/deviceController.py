@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
-from services.dependency import get_devices_service
+from services.dependency import get_devices_service, get_registration_client
 from services.deviceService import DevicesService
 from models.deviceDTO import DeviceCreateDTO, DeviceUpdateDTO
 import json
-
+from grpc.aio import AioRpcError
 
 router = APIRouter(prefix="/devices", tags=["Devices"])
 
@@ -33,3 +33,22 @@ async def update_device(device_id: str, device_data: DeviceUpdateDTO, devices_se
         return HTTPException(status_code = 404, detail = "Device not found")
 
     return updated_device
+
+@router.post("/register/{registration_token}")
+async def register_device(
+        registration_token: str, 
+        devices_service: DevicesService = Depends(get_devices_service),
+        registration_client = Depends(get_registration_client),
+    ):
+    try:
+        return await devices_service.register_device(
+            {
+                "token": registration_token,
+                "name": "Device 1",
+                "description": "Device 1 description",
+                "status": False,
+            },
+            registration_client,
+        )
+    except AioRpcError as e:
+        raise HTTPException(status_code=400, detail="invalid or expired token")

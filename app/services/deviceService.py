@@ -1,6 +1,8 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.schema import Device
+from clients.workspace_registration import WorkspaceRegistrationClient
+from grpc.aio import AioRpcError
 
 class DevicesService:
     def __init__(self, db: AsyncSession):
@@ -28,6 +30,20 @@ class DevicesService:
         await self.db.refresh(new_device)
 
         return new_device
+
+    async def register_device(self, data: dict, registration_client: WorkspaceRegistrationClient) -> Device:
+        try:
+            redeemed = await registration_client.redeem_token(data["token"])
+        except AioRpcError as e:
+            raise e
+
+        device_in = {
+            "workspace_id": redeemed.workspace_id,
+            "name": data["name"],
+            "description": data.get("description", ""),
+            "status": data.get("status", False),
+        }
+        return await self.create_device(device_in)
     
     async def update_device(self, device_id, device_in):
 

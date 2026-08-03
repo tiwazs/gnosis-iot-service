@@ -16,3 +16,8 @@ pytest
 httpx 
 pytest-asyncio 
 pytest-cov
+
+# gRPC
+grpcio
+grpcio-tools
+protobuf
