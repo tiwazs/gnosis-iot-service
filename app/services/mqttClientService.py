@@ -1,6 +1,8 @@
 import asyncio
 import os
 import aiomqtt
+from loguru import logger
+
 
 class MQTTClientService:
     def __init__(self):
@@ -17,22 +19,22 @@ class MQTTClientService:
         # Infinite loop to keep the client running even if the connection is lost
         while True:
             try:
-                print(f"Connecting to MQTT broker at {self.host}:{self.port}")
+                logger.info("Connecting to MQTT broker at {}:{}", self.host, self.port)
                 async with aiomqtt.Client(
-                        self.host, 
+                        self.host,
                         self.port,
                         username=os.getenv("MQTT_USERNAME"),
                         password=os.getenv("MQTT_PASSWORD"),
                     ) as client:
 
                     await client.subscribe(topic)
-                    print(f"Subscribed to topic: {topic}")
+                    logger.info("Subscribed to topic: {}", topic)
                     async for message in client.messages:
                         await self.handle_message(message)
             except Exception as e:
-                print(f"Error in MQTT client: {e}")
+                logger.warning("Error in MQTT client, retrying in 5s: {}", e)
                 await asyncio.sleep(5)
-    
+
     async def handle_message(self, message: aiomqtt.Message):
         # Getting the workspace id and device id from the topic
         topic = str(message.topic)
@@ -42,7 +44,7 @@ class MQTTClientService:
         device_id = parts[3]
         payload = message.payload.decode()
 
-        print(f"Received message from {workspace_id}/{device_id}: {payload}")
+        logger.info("Received message from {}/{}: {}", workspace_id, device_id, payload)
 
     async def stop(self):
         if self.task:
@@ -53,5 +55,4 @@ class MQTTClientService:
                 pass
             finally:
                 self.task = None
-                print("MQTT client stopped")
-
+                logger.info("MQTT client stopped")
