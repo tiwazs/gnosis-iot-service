@@ -1,4 +1,6 @@
 from services.mqttClientService import MQTTClientService
+from datetime import datetime
+import json
 
 class CommandsService:
     def __init__(self, mqtt_client: MQTTClientService):
@@ -18,7 +20,7 @@ class CommandsService:
             }
         }
         
-    async def send_command(self, command_id: int, data: dict = None):
+    async def send_command(self, command_id: int, data: dict = None, workspace_id: str = None, device_id: str = None):
 
         topic = f"gnosis/{workspace_id}/devices/{device_id}/commands"
 
@@ -29,7 +31,7 @@ class CommandsService:
             'data': data,
             'command': self.commands[command_id]['command'],
         }
-        if command in self.commands:
+        if command_id in self.commands:
             await self.mqtt_client.publish(topic, json.dumps(payload))
         else:
             return None

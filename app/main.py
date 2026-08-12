@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from controllers import deviceController
+from controllers import deviceController, commandsController
 from services.mqttClientService import MQTTClientService
 from contextlib import asynccontextmanager
 from logging_setup import setup_logging
@@ -28,6 +28,7 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(deviceController.router)
+    app.include_router(commandsController.router)
 
     # CORS configuration
     origins = [

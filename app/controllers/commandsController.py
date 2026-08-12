@@ -5,5 +5,13 @@ from services.commandsService import CommandsService
 router = APIRouter(prefix="/commands", tags=["Commands"])
 
 @router.post("/")
-async def send_command(command_id: int, data: dict = None, commands_service: CommandsService = Depends(get_commands_service)):
-    return await commands_service.send_command(command_id, data)
+async def send_command(
+                        command_id: int, 
+                        data: dict = None, 
+                        commands_service: CommandsService = Depends(get_commands_service), 
+                        workspace_id: str = None,
+                        device_id: str = None
+                    ):
+    
+
+    return await commands_service.send_command(command_id, data, workspace_id, device_id)
