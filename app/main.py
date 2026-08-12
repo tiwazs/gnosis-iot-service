@@ -7,14 +7,14 @@ from contextlib import asynccontextmanager
 from logging_setup import setup_logging
 from loguru import logger
 
-mqttClientService = MQTTClientService()
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    mqtt = MQTTClientService()
+    app.state.mqtt = mqtt
     logger.info("Starting MQTT client")
-    await mqttClientService.start()
+    await mqtt.start()
     yield
-    await mqttClientService.stop()
+    await mqtt.stop()
 
 def create_app() -> FastAPI:
     load_dotenv()

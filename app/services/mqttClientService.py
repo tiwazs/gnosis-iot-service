@@ -9,6 +9,13 @@ class MQTTClientService:
         self.host = os.getenv("MQTT_HOST")
         self.port = int(os.getenv("MQTT_PORT"))
         self.task: asyncio.Task | None = None
+        self.client: aiomqtt.Client | None = None
+
+    async def publish(self, topic: str, payload: str):
+        if self.client is None:
+            raise Exception("MQTT client not initialized")
+
+        await self.client.publish(topic, payload)
 
     async def start(self):
         self.task = asyncio.create_task(self.run())
@@ -26,14 +33,21 @@ class MQTTClientService:
                         username=os.getenv("MQTT_USERNAME"),
                         password=os.getenv("MQTT_PASSWORD"),
                     ) as client:
+                    
+                    self.client = client
 
-                    await client.subscribe(topic)
+                    await self.client.subscribe(topic)
                     logger.info("Subscribed to topic: {}", topic)
-                    async for message in client.messages:
-                        await self.handle_message(message)
+                    
+                    await self.handle_messages(self.client)
+
             except Exception as e:
                 logger.warning("Error in MQTT client, retrying in 5s: {}", e)
                 await asyncio.sleep(5)
+
+    async def handle_messages(self, client: aiomqtt.Client):
+        async for message in client.messages:
+            await self.handle_message(message)
 
     async def handle_message(self, message: aiomqtt.Message):
         # Getting the workspace id and device id from the topic
