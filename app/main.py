@@ -30,8 +30,8 @@ def create_app() -> FastAPI:
         redoc_url="/iot/redoc"
     )
 
-    app.include_router(deviceController.router)
-    app.include_router(commandsController.router)
+    app.include_router(deviceController.router, prefix="/iot")
+    app.include_router(commandsController.router, prefix="/iot")
 
     # CORS configuration
     origins = [
