@@ -25,6 +25,9 @@ def create_app() -> FastAPI:
         description="Gnosis IoT is a platform for managing IoT devices and their operations.",
         version="1.0.0",
         lifespan=lifespan,
+        docs_url="/iot/docs",
+        openapi_url="/iot/openapi.json",
+        redoc_url="/iot/redoc"
     )
 
     app.include_router(deviceController.router)
