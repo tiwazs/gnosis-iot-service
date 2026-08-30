@@ -1,0 +1,94 @@
+---
+# ------------------------------------#
+# ConfigMap                           #
+# ------------------------------------#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ${K8S_SERVICE_NAME}
+  namespace: ${K8S_NAMESPACE}
+data:
+  SERVER_HOST: "${SERVER_HOST}"
+  SERVER_PORT: "${SERVER_PORT}"
+  WORKSPACE_GRPC_ADDR: "${WORKSPACE_GRPC_ADDR}"
+  MQTT_HOST: "${MQTT_HOST}"
+  MQTT_PORT: "${MQTT_PORT}"
+  MQTT_USERNAME: "${MQTT_USERNAME}"
+
+---
+# ------------------------------------#
+# Secret                              #
+# ------------------------------------#
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ${K8S_SERVICE_NAME}-secret
+  namespace: ${K8S_NAMESPACE}
+type: Opaque
+stringData:
+  DATABASE_URL: "${DATABASE_URL}"
+  MQTT_PASSWORD: "${MQTT_PASSWORD}"
+
+---
+# ------------------------------------#
+# Deployment                          #
+# ------------------------------------#
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${K8S_SERVICE_NAME}
+  namespace: ${K8S_NAMESPACE}
+  labels:
+    app: ${K8S_SERVICE_NAME}
+spec:
+  replicas: ${K8S_MIN_REPLICAS}
+  selector:
+    matchLabels:
+      app: ${K8S_SERVICE_NAME}
+  template:
+    metadata:
+      labels:
+        app: ${K8S_SERVICE_NAME}
+    spec:
+      containers:
+      - name: ${K8S_SERVICE_NAME}
+        image: ${IMAGE_NAME}:${IMAGE_TAG}
+        imagePullPolicy: Always
+        envFrom:
+          - configMapRef:
+              name: ${K8S_SERVICE_NAME}
+          - secretRef:
+              name: ${K8S_SERVICE_NAME}-secret
+        resources:
+          requests:
+            cpu: ${K8S_RESOURCES_REQUESTS_CPU}
+            memory: ${K8S_RESOURCES_REQUESTS_MEMORY}
+          limits:
+            cpu: ${K8S_RESOURCES_LIMITS_CPU}
+            memory: ${K8S_RESOURCES_LIMITS_MEMORY}
+        ports:
+          - name: http
+            containerPort: ${SERVER_PORT}
+      imagePullSecrets:
+        - name: dockerhub-regcred
+
+---
+# ------------------------------------#
+# Service                             #
+# ------------------------------------#
+apiVersion: v1
+kind: Service
+metadata:
+  name: ${K8S_SERVICE_NAME}
+  labels:
+    app: ${K8S_SERVICE_NAME}
+  namespace: ${K8S_NAMESPACE}
+spec:
+  type: ClusterIP
+  selector:
+    app: ${K8S_SERVICE_NAME}
+  ports:
+    - name: http
+      port: ${SERVER_PORT}
+      targetPort: ${SERVER_PORT}
+      protocol: TCP
