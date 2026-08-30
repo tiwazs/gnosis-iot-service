@@ -99,3 +99,5 @@ ipython_config.py
 
 # pipenv
 #   According to pypa/pipenv#5
+
+deployment/k8s_patched.yaml
