@@ -57,8 +57,13 @@ class MQTTClientService:
                     
                     await self.handle_messages(self.client)
 
-            except Exception as e:
-                logger.warning("Error in MQTT client, retrying in 5s: {}", e)
+            except Exception:
+                logger.exception(
+                    "Error in MQTT client at {}:{} (tls={}), retrying in 5s",
+                    self.host,
+                    self.port,
+                    self.ssl_use,
+                )
                 await asyncio.sleep(5)
 
     async def handle_messages(self, client: aiomqtt.Client):
