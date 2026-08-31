@@ -14,6 +14,7 @@ data:
   MQTT_HOST: "${MQTT_HOST}"
   MQTT_PORT: "${MQTT_PORT}"
   MQTT_USERNAME: "${MQTT_USERNAME}"
+  SSL_USE: "${SSL_USE}"
 
 ---
 # ------------------------------------#

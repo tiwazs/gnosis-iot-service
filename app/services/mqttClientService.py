@@ -1,13 +1,22 @@
 import asyncio
 import os
+import ssl
 import aiomqtt
 from loguru import logger
+
+
+def _env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in ("1", "true", "yes", "on")
 
 
 class MQTTClientService:
     def __init__(self):
         self.host = os.getenv("MQTT_HOST")
         self.port = int(os.getenv("MQTT_PORT"))
+        self.ssl_use = _env_bool("SSL_USE")
         self.task: asyncio.Task | None = None
         self.client: aiomqtt.Client | None = None
 
@@ -26,12 +35,19 @@ class MQTTClientService:
         # Infinite loop to keep the client running even if the connection is lost
         while True:
             try:
-                logger.info("Connecting to MQTT broker at {}:{}", self.host, self.port)
+                logger.info(
+                    "Connecting to MQTT broker at {}:{} (tls={})",
+                    self.host,
+                    self.port,
+                    self.ssl_use,
+                )
+                tls_context = ssl.create_default_context() if self.ssl_use else None
                 async with aiomqtt.Client(
                         self.host,
                         self.port,
                         username=os.getenv("MQTT_USERNAME"),
                         password=os.getenv("MQTT_PASSWORD"),
+                        tls_context=tls_context,
                     ) as client:
                     
                     self.client = client
