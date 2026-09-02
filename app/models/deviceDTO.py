@@ -4,8 +4,8 @@ from typing import Optional
 class DeviceCreateDTO(BaseModel):
     workspace_id: str
     name: str
-    description: str
-    status: bool
+    description: Optional[str] = ""
+    status: bool = False
 
 class DeviceUpdateDTO(BaseModel):
     workspace_id: Optional[str] = None

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
+from typing import Optional
 from services.dependency import get_devices_service, get_registration_client
 from services.deviceService import DevicesService
 from models.deviceDTO import DeviceCreateDTO, DeviceUpdateDTO
-import json
 from grpc.aio import AioRpcError
 
 router = APIRouter(prefix="/devices", tags=["Devices"])
@@ -13,8 +13,12 @@ async def get_devices(devices_service: DevicesService = Depends(get_devices_serv
 
 
 @router.get("/workspace/{workspace_id}")
-async def get_devices_by_workspace(workspace: str, devices_service: DevicesService = Depends(get_devices_service)):
-    return await devices_service.get_devices_by_workspace(workspace)
+async def get_devices_by_workspace(
+    workspace_id: str,
+    workspace: Optional[str] = None,
+    devices_service: DevicesService = Depends(get_devices_service),
+):
+    return await devices_service.get_devices_by_workspace(workspace or workspace_id)
 
 @router.get("/{device_id}")
 async def get_device(device_id: str, devices_service: DevicesService = Depends(get_devices_service)):
@@ -24,6 +28,15 @@ async def get_device(device_id: str, devices_service: DevicesService = Depends(g
         return HTTPException(status_code=404, detail="Device not found")
 
     return device
+
+@router.delete("/{device_id}")
+async def delete_device(device_id: str, devices_service: DevicesService = Depends(get_devices_service)):
+    deleted = await devices_service.delete_device(device_id)
+
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Device not found")
+
+    return {"ok": True}
 
 @router.post("/")
 async def create_device(device_data: DeviceCreateDTO, devices_service: DevicesService = Depends(get_devices_service)):
