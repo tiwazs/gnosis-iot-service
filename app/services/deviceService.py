@@ -13,6 +13,13 @@ class DevicesService:
         result = await  self.db.execute(statement)
 
         return result.scalars().all()
+
+    async def get_devices_by_workspace(self, workspace_id):
+        statement = select(Device).where(Device.workspace_id == workspace_id)
+
+        result = await self.db.execute(statement)
+
+        return result.scalars().all()
     
     async def get_device(self, device_id):
         statement = select(Device).where(Device.id == device_id)

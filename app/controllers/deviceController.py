@@ -12,6 +12,10 @@ async def get_devices(devices_service: DevicesService = Depends(get_devices_serv
     return await devices_service.get_devices()
 
 
+@router.get("/{workspace_id}")
+async def get_devices_by_workspace(workspace: str, devices_service: ServicesService = Depends(get_services_service)):
+    return await devices_service.get_devices_by_workspace(workspace)
+
 @router.get("/{device_id}")
 async def get_device(device_id: str, devices_service: DevicesService = Depends(get_devices_service)):
     device =  await devices_service.get_device(device_id)
